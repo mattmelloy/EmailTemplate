@@ -38,7 +38,9 @@ const UseTemplateModal: React.FC<UseTemplateModalProps> = ({ template, onClose }
     if (cc) params.set('cc', cc);
     if (bcc) params.set('bcc', bcc);
     
-    const mailtoLink = `mailto:${recipients}?${params.toString()}`;
+    // Encode spaces as %20 instead of '+' for better mail client compatibility.
+    const paramsString = params.toString().replace(/\+/g, '%20');
+    const mailtoLink = `mailto:${recipients}?${paramsString}`;
 
     // Programmatically create and click an anchor tag for better compatibility.
     // This is more reliable than window.location.href for mailto links.

@@ -99,3 +99,28 @@ export const GlobeAltIcon: React.FC<IconProps> = ({ className }) => (
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9V3m0 18a9 9 0 009-9m-9 9a9 9 0 00-9-9" />
     </svg>
 );
+
+export const BoldIcon: React.FC<IconProps> = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M13.25 4h-5.5C5.015 4 3 6.015 3 8.75s2.015 4.75 4.75 4.75h4.5c2.735 0 4.75-2.015 4.75-4.75S15.985 4 13.25 4zM13.5 13.5H7.75C5.127 13.5 3 15.627 3 18.25S5.127 23 7.75 23h5.75c2.623 0 4.75-2.127 4.75-4.75s-2.127-4.75-4.75-4.75z" transform="scale(0.8) translate(2, -1)" />
+    </svg>
+);
+
+export const ItalicIcon: React.FC<IconProps> = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M10 4h10M4 20h10M14 4l-4 16" />
+    </svg>
+);
+
+export const UnderlineIcon: React.FC<IconProps> = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M6 4v7a6 6 0 1012 0V4M4 20h16" />
+    </svg>
+);
+
+export const HighlightIcon: React.FC<IconProps> = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
+        <path strokeLinecap="round" strokeLinejoin="round" fill="currentColor" d="M20.25 21.75a.75.75 0 0 0 .75-.75V18a.75.75 0 0 0-.75-.75h-5.25a.75.75 0 0 0-.75.75v3a.75.75 0 0 0 .75.75h5.25Z"/>
+    </svg>
+);

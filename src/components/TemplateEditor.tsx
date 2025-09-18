@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Template, Placeholder, Folder, AiAction, TemplateVisibility } from '../types';
 import { correctGrammar, rewriteFriendly, rewriteFormal } from '../services/geminiService';
-import { SaveIcon, TrashIcon, XIcon, SparklesIcon, PlusIcon, TagIcon } from './Icons';
+import { SaveIcon, TrashIcon, XIcon, SparklesIcon, PlusIcon, TagIcon, BoldIcon, ItalicIcon, UnderlineIcon, HighlightIcon } from './Icons';
 
 interface TemplateEditorProps {
   template: Template;
@@ -11,14 +11,77 @@ interface TemplateEditorProps {
   folders: Folder[];
 }
 
+const WysiwygToolbar: React.FC<{ onCommand: (cmd: string, value?: string) => void }> = ({ onCommand }) => {
+    const handleCommand = (e: React.MouseEvent<HTMLButtonElement>) => {
+        const { command, value } = e.currentTarget.dataset;
+        if (command) {
+            onCommand(command, value);
+        }
+    };
+    
+    const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const { command } = e.currentTarget.dataset;
+        const value = e.target.value;
+        if (command && value) {
+            onCommand(command, value);
+            e.target.value = ''; // Reset select
+        }
+    }
+
+    return (
+        <div className="flex items-center flex-wrap gap-1 p-2 bg-gray-100 dark:bg-gray-700/50 rounded-t-md border-b border-gray-300 dark:border-gray-600">
+            <select data-command="fontName" onChange={handleSelectChange} className="text-xs rounded border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                <option value="">Font</option>
+                <option value="Arial">Arial</option>
+                <option value="Verdana">Verdana</option>
+                <option value="Georgia">Georgia</option>
+                <option value="Times New Roman">Times New Roman</option>
+            </select>
+            <select data-command="fontSize" onChange={handleSelectChange} className="text-xs rounded border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                <option value="">Size</option>
+                <option value="2">Small</option>
+                <option value="3">Normal</option>
+                <option value="5">Large</option>
+                <option value="7">Huge</option>
+            </select>
+            <div className="w-px h-5 bg-gray-300 dark:bg-gray-500 mx-1"></div>
+            <button data-command="bold" onClick={handleCommand} className="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-gray-600" title="Bold"><BoldIcon className="w-5 h-5"/></button>
+            <button data-command="italic" onClick={handleCommand} className="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-gray-600" title="Italic"><ItalicIcon className="w-5 h-5"/></button>
+            <button data-command="underline" onClick={handleCommand} className="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-gray-600" title="Underline"><UnderlineIcon className="w-5 h-5"/></button>
+            <button data-command="backColor" data-value="#FFFFA7" onClick={handleCommand} className="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-gray-600" title="Highlight"><HighlightIcon className="w-5 h-5"/></button>
+        </div>
+    );
+};
+
 const TemplateEditor: React.FC<TemplateEditorProps> = ({ template, onSave, onClose, onDelete, folders }) => {
   const [editedTemplate, setEditedTemplate] = useState<Template>(JSON.parse(JSON.stringify(template)));
   const [newPlaceholder, setNewPlaceholder] = useState({ name: '', sample: '' });
   const [isAiLoading, setIsAiLoading] = useState<AiAction | null>(null);
+  const editorRef = useRef<HTMLDivElement>(null);
+
+  // Sync editor content when AI rewrites the body
+  useEffect(() => {
+    if (editorRef.current && editedTemplate.body !== editorRef.current.innerHTML) {
+      editorRef.current.innerHTML = editedTemplate.body;
+    }
+  }, [editedTemplate.body]);
+  
+  // Set initial content when template changes
+  useEffect(() => {
+    if (editorRef.current) {
+        editorRef.current.innerHTML = template.body;
+    }
+  }, [template.id]);
+
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setEditedTemplate(prev => ({ ...prev, [name]: value }));
+  };
+  
+  const handleBodyChange = (e: React.FormEvent<HTMLDivElement>) => {
+    const newBody = e.currentTarget.innerHTML;
+    setEditedTemplate(prev => ({ ...prev, body: newBody }));
   };
 
   const handlePlaceholderChange = (index: number, field: keyof Placeholder, value: string) => {
@@ -42,8 +105,10 @@ const TemplateEditor: React.FC<TemplateEditorProps> = ({ template, onSave, onClo
   }
 
   const insertPlaceholder = (name: string) => {
-    // This is a simplified insertion. A real rich text editor would be more complex.
-    setEditedTemplate(prev => ({...prev, body: prev.body + `{${name}}`}));
+    if (editorRef.current) {
+        editorRef.current.focus();
+        document.execCommand('insertText', false, `{${name}}`);
+    }
   }
 
   const handleAiAction = async (action: AiAction) => {
@@ -64,6 +129,15 @@ const TemplateEditor: React.FC<TemplateEditorProps> = ({ template, onSave, onClo
       alert('An error occurred while using the AI assistant.');
     } finally {
       setIsAiLoading(null);
+    }
+  };
+  
+  const handleFormatCommand = (command: string, value: string | undefined) => {
+    document.execCommand(command, false, value);
+    editorRef.current?.focus();
+    // Manually trigger input event to capture change
+    if(editorRef.current) {
+        handleBodyChange({ currentTarget: editorRef.current } as React.FormEvent<HTMLDivElement>);
     }
   };
 
@@ -110,7 +184,19 @@ const TemplateEditor: React.FC<TemplateEditorProps> = ({ template, onSave, onClo
             </div>
             <div>
               <label htmlFor="body" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Body</label>
-              <textarea name="body" id="body" value={editedTemplate.body} onChange={handleChange} rows={10} className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
+              <div className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 shadow-sm focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500">
+                <WysiwygToolbar onCommand={handleFormatCommand} />
+                <div
+                    ref={editorRef}
+                    id="body"
+                    contentEditable
+                    onInput={handleBodyChange}
+                    className="p-2 min-h-[200px] max-h-[300px] overflow-y-auto outline-none"
+                    aria-label="Email body"
+                    // Using a ref to manage innerHTML to avoid cursor jumping issues
+                    // that occur when using dangerouslySetInnerHTML with state updates.
+                 />
+              </div>
             </div>
           </div>
 
