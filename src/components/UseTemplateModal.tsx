@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Template } from '../types';
 import { generateEmlContent } from '../services/emlService';
-import { XIcon, MailIcon } from './Icons';
+import { XIcon, MailIcon, DownloadIcon } from './Icons';
 
 interface UseTemplateModalProps {
   template: Template;
@@ -24,8 +24,38 @@ const UseTemplateModal: React.FC<UseTemplateModalProps> = ({ template, onClose }
     }
     return rendered;
   };
+
+  const handleMailto = () => {
+    const to = renderContent(template.recipients);
+    const cc = renderContent(template.cc);
+    const bcc = renderContent(template.bcc);
+    const subject = renderContent(template.subject);
+    
+    // Basic HTML to plain text conversion for mailto body
+    const plainTextBody = renderContent(template.body)
+      .replace(/<p>/gi, '')
+      .replace(/<\/p>/gi, '\n\n')
+      .replace(/<br\s*\/?>/gi, '\n')
+      .replace(/<[^>]+>/g, '') // strip any other tags
+      .trim();
+
+    const params = new URLSearchParams();
+    if (subject) params.set('subject', subject);
+    if (plainTextBody) params.set('body', plainTextBody);
+    if (cc) params.set('cc', cc);
+    if (bcc) params.set('bcc', bcc);
+    
+    const mailtoLink = `mailto:${to}?${params.toString()}`;
+
+    // Use an anchor tag to trigger the mailto link
+    const a = document.createElement('a');
+    a.href = mailtoLink;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
   
-  const handleOpenInEmailApp = () => {
+  const handleEmlDownload = () => {
     const renderedEmail = {
         fromName: template.fromName ? renderContent(template.fromName) : undefined,
         fromEmail: renderContent(template.fromEmail || 'sender@example.com'),
@@ -76,13 +106,22 @@ const UseTemplateModal: React.FC<UseTemplateModalProps> = ({ template, onClose }
             )}
         </div>
 
-        <div className="flex justify-end space-x-3 p-4 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-200 dark:border-gray-700">
+        <div className="flex justify-end items-center space-x-3 p-4 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-200 dark:border-gray-700">
           <button
-            onClick={handleOpenInEmailApp}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            onClick={handleMailto}
+            title="Opens a plain-text version in your default email app. Formatting will be lost."
+            className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
           >
             <MailIcon className="w-5 h-5 mr-2" />
-            Open in Email App
+            Open in Email App (Plain Text)
+          </button>
+          <button
+            onClick={handleEmlDownload}
+            title="Downloads a file that opens in your email app with full formatting."
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
+          >
+            <DownloadIcon className="w-5 h-5 mr-2" />
+            Download Formatted File (.eml)
           </button>
         </div>
       </div>
