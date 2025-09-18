@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Template, Placeholder, Folder, AiAction, TemplateVisibility } from '../types';
 import { correctGrammar, rewriteFriendly, rewriteFormal } from '../services/geminiService';

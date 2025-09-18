@@ -1,3 +1,4 @@
+
 import { Template, Folder, TemplatePriority, TemplateVisibility } from './types';
 
 export const USER_ID = 'uuid-user-1'; // This will be replaced by the authenticated user's ID

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { User } from '@supabase/supabase-js';
 import { Folder } from '../types';

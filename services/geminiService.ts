@@ -1,47 +1,38 @@
+import { AiAction } from '../types';
 
-import { GoogleGenAI } from "@google/genai";
+async function callAiAssistant(action: AiAction, emailBody: string): Promise<string> {
+  const response = await fetch('/api/ai-assistant', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ action, emailBody }),
+  });
 
-// Fix: Refactored to align with @google/genai SDK guidelines.
-// The API key is sourced directly from `process.env.API_KEY` and is assumed to be set.
-// Removed manual API key checks and mock responses.
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
-
-async function callGemini(prompt: string): Promise<string> {
-  try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: prompt,
-    });
-    return response.text;
-  } catch (error) {
-    console.error("Error calling Gemini API:", error);
-    throw new Error("Failed to get response from AI model.");
+  if (!response.ok) {
+    const errorData = await response.json();
+    console.error('Error calling AI assistant API:', errorData);
+    throw new Error(errorData.error || `Failed to get response from AI assistant. Status: ${response.status}`);
   }
+
+  const data = await response.json();
+  
+  if (typeof data?.revisedText !== 'string') {
+      console.error('Invalid response from AI function:', data);
+      throw new Error('Received an invalid response from the AI assistant.');
+  }
+
+  return data.revisedText;
 }
 
 export async function correctGrammar(emailBody: string): Promise<string> {
-  const prompt = `
-You are a professional assistant. Correct grammar, spelling, and punctuation in the following email. Preserve any placeholders that are in the form {PlaceholderName}. Keep the meaning and tone unchanged unless necessary for clarity. Return only the corrected email body (no commentary).
-Email:
----
-${emailBody}`;
-  return callGemini(prompt);
+  return callAiAssistant(AiAction.GRAMMAR, emailBody);
 }
 
 export async function rewriteFriendly(emailBody: string): Promise<string> {
-  const prompt = `
-You are a friendly professional assistant. Rewrite the email below to be friendly and helpful, keeping placeholders like {ClientName} unchanged. Keep content concise and make any phrasing more approachable. Return only the rewritten email body.
-Email:
----
-${emailBody}`;
-  return callGemini(prompt);
+  return callAiAssistant(AiAction.FRIENDLY, emailBody);
 }
 
 export async function rewriteFormal(emailBody: string): Promise<string> {
-  const prompt = `
-You are a professional copy editor. Rewrite the email below to be formal and professional, preserving placeholders like {ClientName}. Avoid casual language. Return only the rewritten email body.
-Email:
----
-${emailBody}`;
-  return callGemini(prompt);
+  return callAiAssistant(AiAction.FORMAL, emailBody);
 }
