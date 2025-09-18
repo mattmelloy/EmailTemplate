@@ -1,6 +1,4 @@
-// This is a Vercel Serverless Function, equivalent to an API endpoint.
-// It must be placed in the /api directory.
-
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { GoogleGenAI } from "@google/genai";
 
 // Define the structure of the incoming request body
@@ -28,51 +26,52 @@ Email:
 ${emailBody}`,
 };
 
-export default async function handler(request: Request, response: Response) {
-    // Handle CORS preflight request for development (Vercel handles this in production)
-    if (request.method === 'OPTIONS') {
-        return new Response('ok', { headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type' } });
+export default async function handler(
+  request: VercelRequest,
+  response: VercelResponse,
+) {
+  // Set CORS headers for all responses
+  response.setHeader('Access-Control-Allow-Origin', '*'); // Or lock down to your Vercel URL
+  response.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  response.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+  // Handle CORS preflight request
+  if (request.method === 'OPTIONS') {
+    return response.status(200).end();
+  }
+
+  if (request.method !== 'POST') {
+    return response.status(405).json({ error: 'Method Not Allowed' });
+  }
+
+  try {
+    const { action, emailBody } = request.body as RequestBody;
+
+    if (!action || !emailBody || !prompts[action]) {
+      return response.status(400).json({ error: 'Invalid request body. "action" and "emailBody" are required.' });
+    }
+    
+    // Securely get the API key from Vercel environment variables
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      console.error('GEMINI_API_KEY is not set in environment variables.');
+      return response.status(500).json({ error: 'Server configuration error.' });
     }
 
-    try {
-        const { action, emailBody } = (await request.json()) as RequestBody;
+    const ai = new GoogleGenAI({ apiKey });
+    const prompt = prompts[action](emailBody);
 
-        if (!action || !emailBody || !prompts[action]) {
-            return new Response(JSON.stringify({ error: 'Invalid request body. "action" and "emailBody" are required.' }), {
-                status: 400,
-                headers: { 'Content-Type': 'application/json' },
-            });
-        }
-        
-        // Securely get the API key from Vercel environment variables
-        const apiKey = process.env.GEMINI_API_KEY;
-        if (!apiKey) {
-            return new Response(JSON.stringify({ error: 'GEMINI_API_KEY is not set in environment variables.' }), {
-                status: 500,
-                headers: { 'Content-Type': 'application/json' },
-            });
-        }
+    const geminiResponse = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+    });
 
-        const ai = new GoogleGenAI({ apiKey });
-        const prompt = prompts[action](emailBody);
+    const revisedText = geminiResponse.text;
 
-        const geminiResponse = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: prompt,
-        });
+    return response.status(200).json({ revisedText });
 
-        const revisedText = geminiResponse.text;
-
-        return new Response(JSON.stringify({ revisedText }), {
-            status: 200,
-            headers: { 'Content-Type': 'application/json' },
-        });
-
-    } catch (error) {
-        console.error('Error in Vercel Function:', error);
-        return new Response(JSON.stringify({ error: error.message }), {
-            status: 500,
-            headers: { 'Content-Type': 'application/json' },
-        });
-    }
+  } catch (error) {
+    console.error('Error in Vercel Function:', error);
+    return response.status(500).json({ error: error.message || 'An unexpected error occurred.' });
+  }
 }
