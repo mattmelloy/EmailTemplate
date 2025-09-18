@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import { Template, Placeholder, Folder, AiAction } from '../types';
+import { Template, Placeholder, Folder, AiAction, TemplateVisibility } from '../types';
 import { correctGrammar, rewriteFriendly, rewriteFormal } from '../services/geminiService';
 import { SaveIcon, TrashIcon, XIcon, SparklesIcon, PlusIcon, TagIcon } from './Icons';
 
@@ -117,11 +116,21 @@ const TemplateEditor: React.FC<TemplateEditorProps> = ({ template, onSave, onClo
 
           {/* Sidebar */}
           <div className="col-span-1 space-y-6">
-             <div>
-              <label htmlFor="folderId" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Folder</label>
-              <select name="folderId" id="folderId" value={editedTemplate.folderId || ''} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                {folders.map(f => <option key={f.id} value={f.id}>{f.name}</option>)}
-              </select>
+             <div className="grid grid-cols-2 gap-4">
+               <div>
+                <label htmlFor="folderId" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Folder</label>
+                <select name="folderId" id="folderId" value={editedTemplate.folderId || ''} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                  <option value="" disabled>Select a folder</option>
+                  {folders.map(f => <option key={f.id} value={f.id}>{f.name}</option>)}
+                </select>
+               </div>
+                <div>
+                  <label htmlFor="visibility" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Visibility</label>
+                  <select name="visibility" id="visibility" value={editedTemplate.visibility} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                    <option value={TemplateVisibility.PERSONAL}>Personal</option>
+                    <option value={TemplateVisibility.TEAM}>Team</option>
+                  </select>
+                </div>
             </div>
             
             {/* AI Assistant */}
