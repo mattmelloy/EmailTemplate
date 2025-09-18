@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Template } from '../types';
 import { generateEmlContent } from '../services/emlService';
-import { XIcon, MailIcon, DownloadIcon } from './Icons';
+import { XIcon, MailIcon } from './Icons';
 
 interface UseTemplateModalProps {
   template: Template;
@@ -24,61 +24,8 @@ const UseTemplateModal: React.FC<UseTemplateModalProps> = ({ template, onClose }
     }
     return rendered;
   };
-
-  const handleMailto = () => {
-    const recipients = renderContent(template.recipients);
-    const cc = renderContent(template.cc);
-    const bcc = renderContent(template.bcc);
-    const subject = renderContent(template.subject);
-    
-    // Function to convert rich text (HTML) to plain text for the mailto body.
-    // Mailto links do not reliably support HTML.
-    const convertHtmlToPlainText = (html: string): string => {
-      let text = html;
-      
-      // Replace block-level tags with newlines for better readability.
-      text = text.replace(/<p>/gi, ''); // Remove opening p-tags
-      text = text.replace(/<\/p>/gi, '\n\n'); // Convert closing p-tags to double newlines
-      text = text.replace(/<br\s*\/?>/gi, '\n'); // Convert <br> to a single newline
-      
-      // Strip any remaining HTML tags (like <b>, <span>, etc.).
-      text = text.replace(/<[^>]+>/g, '');
-      
-      // Decode HTML entities (e.g., &nbsp;, &amp;) into their characters.
-      // Using a temporary element is a robust and safe way to handle this.
-      try {
-        const tempEl = document.createElement('textarea');
-        tempEl.innerHTML = text;
-        text = tempEl.value;
-      } catch (e) {
-        console.error("Could not decode HTML entities", e);
-      }
-
-      return text.trim();
-    };
-
-    const body = convertHtmlToPlainText(renderContent(template.body));
-
-    const params = new URLSearchParams();
-    if (subject) params.set('subject', subject);
-    if (body) params.set('body', body);
-    if (cc) params.set('cc', cc);
-    if (bcc) params.set('bcc', bcc);
-    
-    // Encode spaces as %20 instead of '+' for better mail client compatibility.
-    const paramsString = params.toString().replace(/\+/g, '%20');
-    const mailtoLink = `mailto:${recipients}?${paramsString}`;
-
-    // Programmatically create and click an anchor tag for better compatibility.
-    // This is more reliable than window.location.href for mailto links.
-    const a = document.createElement('a');
-    a.href = mailtoLink;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  };
   
-  const handleEmlDownload = () => {
+  const handleOpenInEmailApp = () => {
     const renderedEmail = {
         fromName: template.fromName ? renderContent(template.fromName) : undefined,
         fromEmail: renderContent(template.fromEmail || 'sender@example.com'),
@@ -131,18 +78,11 @@ const UseTemplateModal: React.FC<UseTemplateModalProps> = ({ template, onClose }
 
         <div className="flex justify-end space-x-3 p-4 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-200 dark:border-gray-700">
           <button
-            onClick={handleMailto}
-            className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
+            onClick={handleOpenInEmailApp}
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
           >
             <MailIcon className="w-5 h-5 mr-2" />
-            Open in Email Client
-          </button>
-          <button
-            onClick={handleEmlDownload}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
-          >
-            <DownloadIcon className="w-5 h-5 mr-2" />
-            Download .eml File
+            Open in Email App
           </button>
         </div>
       </div>
