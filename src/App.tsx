@@ -58,7 +58,7 @@ const App: React.FC = () => {
         name: t.name,
         fromName: t.from_name,
         fromEmail: t.from_email,
-        to: t.to,
+        recipient: t.to, // Map database 'to' to app 'recipient'
         cc: t.cc,
         bcc: t.bcc,
         subject: t.subject,
@@ -126,7 +126,7 @@ const App: React.FC = () => {
     if (!session?.user) return;
 
     // Map frontend camelCase to database snake_case
-    const { id, teamId, userId, folderId, name, fromName, fromEmail, to, cc, bcc, subject, body, placeholders, priority, visibility } = templateToSave;
+    const { id, teamId, userId, folderId, name, fromName, fromEmail, recipient, cc, bcc, subject, body, placeholders, priority, visibility } = templateToSave;
     const record = {
       team_id: teamId,
       user_id: userId,
@@ -134,7 +134,8 @@ const App: React.FC = () => {
       name,
       from_name: fromName,
       from_email: fromEmail,
-      to, cc, bcc, subject, body, placeholders, priority, visibility,
+      'to': recipient, // Map app 'recipient' to database 'to'
+      cc, bcc, subject, body, placeholders, priority, visibility,
     };
 
     let error;

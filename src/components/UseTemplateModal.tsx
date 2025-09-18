@@ -26,7 +26,7 @@ const UseTemplateModal: React.FC<UseTemplateModalProps> = ({ template, onClose }
   };
 
   const handleMailto = () => {
-    const to = renderContent(template.to);
+    const recipient = renderContent(template.recipient);
     const cc = renderContent(template.cc);
     const bcc = renderContent(template.bcc);
     const subject = renderContent(template.subject);
@@ -38,7 +38,7 @@ const UseTemplateModal: React.FC<UseTemplateModalProps> = ({ template, onClose }
     if (cc) params.set('cc', cc);
     if (bcc) params.set('bcc', bcc);
     
-    const mailtoLink = `mailto:${to}?${params.toString()}`;
+    const mailtoLink = `mailto:${recipient}?${params.toString()}`;
 
     // Programmatically create and click an anchor tag for better compatibility.
     // This is more reliable than window.location.href for mailto links.
@@ -53,7 +53,7 @@ const UseTemplateModal: React.FC<UseTemplateModalProps> = ({ template, onClose }
     const renderedEmail = {
         fromName: template.fromName ? renderContent(template.fromName) : undefined,
         fromEmail: renderContent(template.fromEmail || 'sender@example.com'),
-        to: renderContent(template.to),
+        recipient: renderContent(template.recipient),
         cc: renderContent(template.cc),
         subject: renderContent(template.subject),
         body: renderContent(template.body),
