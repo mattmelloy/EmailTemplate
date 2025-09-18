@@ -10,7 +10,7 @@ const Header: React.FC<HeaderProps> = ({ onNewTemplate }) => {
     <header className="bg-white dark:bg-gray-800 shadow-sm p-4 flex justify-between items-center border-b border-gray-200 dark:border-gray-700">
       <div className="flex items-center">
         <MailIcon className="w-8 h-8 text-indigo-500" />
-        <h1 className="text-2xl font-bold ml-3 text-gray-800 dark:text-white">Email Template AI Assistant</h1>
+        <h1 className="text-2xl font-bold ml-3 text-gray-800 dark:text-white">AutoDraft</h1>
       </div>
       <button
         onClick={onNewTemplate}

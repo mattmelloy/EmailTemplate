@@ -1,5 +1,5 @@
 {
-  "name": "Email Template AI Assistant",
-  "description": "A lightweight, polished web app that lets individuals and teams create, share, and manage email templates with AI-powered improvements. Export ready-to-edit drafts to your mail client via mailto links or EML file downloads.",
+  "name": "AutoDraft",
+  "description": "AutoDraft is a lightweight, polished web app that lets individuals and teams create, share, and manage email templates with AI-powered improvements. Export ready-to-edit drafts to your mail client via mailto links or EML file downloads.",
   "requestFramePermissions": []
 }

@@ -12,7 +12,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick }) => {
       <header className="py-4 px-6 md:px-12 flex justify-between items-center border-b border-gray-200 dark:border-gray-800">
         <div className="flex items-center">
           <MailIcon className="w-8 h-8 text-indigo-500" />
-          <h1 className="text-2xl font-bold ml-3">Email Template AI Assistant</h1>
+          <h1 className="text-2xl font-bold ml-3">AutoDraft</h1>
         </div>
         <button
           onClick={onLoginClick}
@@ -70,7 +70,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick }) => {
 
       {/* Footer */}
       <footer className="py-8 px-6 md:px-12 text-center text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-gray-800">
-        <p>&copy; {new Date().getFullYear()} Email Template AI Assistant. All rights reserved.</p>
+        <p>&copy; {new Date().getFullYear()} AutoDraft. All rights reserved.</p>
       </footer>
     </div>
   );

@@ -30,7 +30,34 @@ const UseTemplateModal: React.FC<UseTemplateModalProps> = ({ template, onClose }
     const cc = renderContent(template.cc);
     const bcc = renderContent(template.bcc);
     const subject = renderContent(template.subject);
-    const body = renderContent(template.body.replace(/<p>/g, '').replace(/<\/p>/g, '\n\n').replace(/<br>/g, '\n')); // Basic HTML to text
+    
+    // Function to convert rich text (HTML) to plain text for the mailto body.
+    // Mailto links do not reliably support HTML.
+    const convertHtmlToPlainText = (html: string): string => {
+      let text = html;
+      
+      // Replace block-level tags with newlines for better readability.
+      text = text.replace(/<p>/gi, ''); // Remove opening p-tags
+      text = text.replace(/<\/p>/gi, '\n\n'); // Convert closing p-tags to double newlines
+      text = text.replace(/<br\s*\/?>/gi, '\n'); // Convert <br> to a single newline
+      
+      // Strip any remaining HTML tags (like <b>, <span>, etc.).
+      text = text.replace(/<[^>]+>/g, '');
+      
+      // Decode HTML entities (e.g., &nbsp;, &amp;) into their characters.
+      // Using a temporary element is a robust and safe way to handle this.
+      try {
+        const tempEl = document.createElement('textarea');
+        tempEl.innerHTML = text;
+        text = tempEl.value;
+      } catch (e) {
+        console.error("Could not decode HTML entities", e);
+      }
+
+      return text.trim();
+    };
+
+    const body = convertHtmlToPlainText(renderContent(template.body));
 
     const params = new URLSearchParams();
     if (subject) params.set('subject', subject);
