@@ -1,6 +1,10 @@
 import { AiAction } from '../types';
 
-async function callAiAssistant(action: AiAction, emailBody: string): Promise<string> {
+async function callAiAssistant(
+  action: AiAction, 
+  emailBody: string, 
+  onChunk: (chunk: string) => void
+): Promise<void> {
   const response = await fetch('/api/ai-assistant', {
     method: 'POST',
     headers: {
@@ -9,30 +13,38 @@ async function callAiAssistant(action: AiAction, emailBody: string): Promise<str
     body: JSON.stringify({ action, emailBody }),
   });
 
-  if (!response.ok) {
-    const errorData = await response.json();
+  if (!response.ok || !response.body) {
+    const errorData = await response.json().catch(() => ({ error: 'An unknown error occurred while processing the AI request.' }));
     console.error('Error calling AI assistant API:', errorData);
     throw new Error(errorData.error || `Failed to get response from AI assistant. Status: ${response.status}`);
   }
 
-  const data = await response.json();
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
   
-  if (typeof data?.revisedText !== 'string') {
-      console.error('Invalid response from AI function:', data);
-      throw new Error('Received an invalid response from the AI assistant.');
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) {
+        break;
+      }
+      const chunk = decoder.decode(value, { stream: true });
+      onChunk(chunk);
+    }
+  } catch (error) {
+    console.error("Error reading stream from AI assistant:", error);
+    throw new Error("Failed to read the AI's response stream.");
   }
-
-  return data.revisedText;
 }
 
-export async function correctGrammar(emailBody: string): Promise<string> {
-  return callAiAssistant(AiAction.GRAMMAR, emailBody);
+export async function correctGrammar(emailBody: string, onChunk: (chunk: string) => void): Promise<void> {
+  return callAiAssistant(AiAction.GRAMMAR, emailBody, onChunk);
 }
 
-export async function rewriteFriendly(emailBody: string): Promise<string> {
-  return callAiAssistant(AiAction.FRIENDLY, emailBody);
+export async function rewriteFriendly(emailBody: string, onChunk: (chunk: string) => void): Promise<void> {
+  return callAiAssistant(AiAction.FRIENDLY, emailBody, onChunk);
 }
 
-export async function rewriteFormal(emailBody: string): Promise<string> {
-  return callAiAssistant(AiAction.FORMAL, emailBody);
+export async function rewriteFormal(emailBody: string, onChunk: (chunk: string) => void): Promise<void> {
+  return callAiAssistant(AiAction.FORMAL, emailBody, onChunk);
 }

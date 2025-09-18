@@ -71,21 +71,29 @@ const TemplateEditor: React.FC<TemplateEditorProps> = ({ template, onSave, onClo
   }
 
   const handleAiAction = async (action: AiAction) => {
-    if (!editedTemplate.body) return;
+    const currentBody = editorRef.current?.innerHTML || editedTemplate.body;
+    if (!currentBody.trim()) return;
+
     setIsAiLoading(action);
+    setEditedTemplate(prev => ({ ...prev, body: '' })); // Clear the body for streaming
+
     try {
-      let newBody = '';
-      if (action === AiAction.GRAMMAR) {
-        newBody = await correctGrammar(editedTemplate.body);
-      } else if (action === AiAction.FRIENDLY) {
-        newBody = await rewriteFriendly(editedTemplate.body);
-      } else if (action === AiAction.FORMAL) {
-        newBody = await rewriteFormal(editedTemplate.body);
-      }
-      setEditedTemplate(prev => ({ ...prev, body: newBody }));
+      const onChunk = (chunk: string) => {
+        setEditedTemplate(prev => ({ ...prev, body: prev.body + chunk }));
+      };
+      
+      const aiFunctions = {
+        [AiAction.GRAMMAR]: correctGrammar,
+        [AiAction.FRIENDLY]: rewriteFriendly,
+        [AiAction.FORMAL]: rewriteFormal,
+      };
+
+      await aiFunctions[action](currentBody, onChunk);
+
     } catch (error) {
       console.error('AI action failed:', error);
       alert('An error occurred while using the AI assistant.');
+      setEditedTemplate(prev => ({ ...prev, body: currentBody })); // Restore original body on error
     } finally {
       setIsAiLoading(null);
     }
