@@ -82,6 +82,7 @@ export function generateEmlContent(data: EmailData): string {
   const fromHeaderValue = fromDisplayName ? `${fromDisplayName} <${data.fromEmail}>` : data.fromEmail;
 
   const headers = [
+    `X-Unsent: 1`,
     `From: ${fromHeaderValue}`,
     `To: ${data.recipients}`,
     data.cc ? `Cc: ${data.cc}` : null,

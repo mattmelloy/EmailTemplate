@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Template, Placeholder, Folder, AiAction, TemplateVisibility } from '../types';
 import { correctGrammar, rewriteFriendly, rewriteFormal } from '../services/geminiService';
-import { SaveIcon, TrashIcon, XIcon, SparklesIcon, PlusIcon, TagIcon, BoldIcon, ItalicIcon, UnderlineIcon, HighlightIcon } from './Icons';
+import { SaveIcon, TrashIcon, XIcon, SparklesIcon, PlusIcon, TagIcon } from './Icons';
+import WysiwygToolbar from './WysiwygToolbar';
 
 interface TemplateEditorProps {
   template: Template;
@@ -10,48 +11,6 @@ interface TemplateEditorProps {
   onDelete: (id: string) => void;
   folders: Folder[];
 }
-
-const WysiwygToolbar: React.FC<{ onCommand: (cmd: string, value?: string) => void }> = ({ onCommand }) => {
-    const handleCommand = (e: React.MouseEvent<HTMLButtonElement>) => {
-        const { command, value } = e.currentTarget.dataset;
-        if (command) {
-            onCommand(command, value);
-        }
-    };
-    
-    const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const { command } = e.currentTarget.dataset;
-        const value = e.target.value;
-        if (command && value) {
-            onCommand(command, value);
-            e.target.value = ''; // Reset select
-        }
-    }
-
-    return (
-        <div className="flex items-center flex-wrap gap-1 p-2 bg-gray-100 dark:bg-gray-700/50 rounded-t-md border-b border-gray-300 dark:border-gray-600">
-            <select data-command="fontName" onChange={handleSelectChange} className="text-xs rounded border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                <option value="">Font</option>
-                <option value="Arial">Arial</option>
-                <option value="Verdana">Verdana</option>
-                <option value="Georgia">Georgia</option>
-                <option value="Times New Roman">Times New Roman</option>
-            </select>
-            <select data-command="fontSize" onChange={handleSelectChange} className="text-xs rounded border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                <option value="">Size</option>
-                <option value="2">Small</option>
-                <option value="3">Normal</option>
-                <option value="5">Large</option>
-                <option value="7">Huge</option>
-            </select>
-            <div className="w-px h-5 bg-gray-300 dark:bg-gray-500 mx-1"></div>
-            <button data-command="bold" onClick={handleCommand} className="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-gray-600" title="Bold"><BoldIcon className="w-5 h-5"/></button>
-            <button data-command="italic" onClick={handleCommand} className="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-gray-600" title="Italic"><ItalicIcon className="w-5 h-5"/></button>
-            <button data-command="underline" onClick={handleCommand} className="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-gray-600" title="Underline"><UnderlineIcon className="w-5 h-5"/></button>
-            <button data-command="backColor" data-value="#FFFFA7" onClick={handleCommand} className="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-gray-600" title="Highlight"><HighlightIcon className="w-5 h-5"/></button>
-        </div>
-    );
-};
 
 const TemplateEditor: React.FC<TemplateEditorProps> = ({ template, onSave, onClose, onDelete, folders }) => {
   const [editedTemplate, setEditedTemplate] = useState<Template>(JSON.parse(JSON.stringify(template)));
@@ -133,9 +92,9 @@ const TemplateEditor: React.FC<TemplateEditorProps> = ({ template, onSave, onClo
   };
   
   const handleFormatCommand = (command: string, value: string | undefined) => {
-    document.execCommand(command, false, value);
     editorRef.current?.focus();
-    // Manually trigger input event to capture change
+    document.execCommand(command, false, value);
+    // Manually trigger input event to capture change and update state
     if(editorRef.current) {
         handleBodyChange({ currentTarget: editorRef.current } as React.FormEvent<HTMLDivElement>);
     }
@@ -193,8 +152,6 @@ const TemplateEditor: React.FC<TemplateEditorProps> = ({ template, onSave, onClo
                     onInput={handleBodyChange}
                     className="p-2 min-h-[200px] max-h-[300px] overflow-y-auto outline-none"
                     aria-label="Email body"
-                    // Using a ref to manage innerHTML to avoid cursor jumping issues
-                    // that occur when using dangerouslySetInnerHTML with state updates.
                  />
               </div>
             </div>
