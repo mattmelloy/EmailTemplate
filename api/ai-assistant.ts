@@ -36,8 +36,8 @@ export default async function handler(req: Request) {
     }
 
     if (!process.env.API_KEY) {
-      console.error('API_KEY not configured on server');
-      return new Response(JSON.stringify({ error: 'AI Assistant not configured' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+      console.error('API_KEY environment variable not configured on server.');
+      return new Response(JSON.stringify({ error: 'AI Assistant is not configured. The required API key is missing from the server environment.' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
     }
 
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });

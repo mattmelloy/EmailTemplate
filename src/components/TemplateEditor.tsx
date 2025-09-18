@@ -92,7 +92,8 @@ const TemplateEditor: React.FC<TemplateEditorProps> = ({ template, onSave, onClo
 
     } catch (error) {
       console.error('AI action failed:', error);
-      alert('An error occurred while using the AI assistant.');
+      const errorMessage = error instanceof Error ? error.message : 'An error occurred while using the AI assistant.';
+      alert(`AI Assistant Error: ${errorMessage}`);
       setEditedTemplate(prev => ({ ...prev, body: currentBody })); // Restore original body on error
     } finally {
       setIsAiLoading(null);
