@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Template, Placeholder, Folder, AiAction, TemplateVisibility } from '../types';
 import { correctGrammar, rewriteFriendly, rewriteFormal } from '../services/geminiService';
 import { SaveIcon, TrashIcon, XIcon, SparklesIcon, PlusIcon, TagIcon } from './Icons';
