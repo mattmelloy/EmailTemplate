@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { supabase } from './services/supabaseClient';
 import { Session } from '@supabase/supabase-js';
@@ -103,7 +104,7 @@ const App: React.FC = () => {
       id: `new-${Date.now()}`,
       ...JSON.parse(JSON.stringify(EMPTY_TEMPLATE)),
       userId: session.user.id,
-      teamId: TEAM_ID, // Assign a default team
+      teamId: null, // FIX: Use null for new templates instead of an invalid placeholder string.
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       folderId: selectedFolder || folders[0]?.id || null,
@@ -138,14 +139,20 @@ const App: React.FC = () => {
 
     let error;
     if (id.startsWith('new-')) {
-      ({ error } = await supabase.from('templates').insert({ ...record, user_id: session.user.id }));
+      // For new records, explicitly set the user_id from the session
+      const { error: insertError } = await supabase.from('templates').insert({ ...record, user_id: session.user.id });
+      error = insertError;
     } else {
-      ({ error } = await supabase.from('templates').update(record).eq('id', id));
+      // For existing records, update based on ID
+      const { error: updateError } = await supabase.from('templates').update(record).eq('id', id);
+      error = updateError;
     }
     
     if (error) {
-      console.error('Error saving template:', error);
-      alert('Failed to save template.');
+      // Enhanced debugging as requested
+      console.error('Error saving template. Details:', error);
+      console.error('Data sent to Supabase:', record);
+      alert(`Failed to save template. Error: ${error.message}\n\nCheck the console for more details.`);
     } else {
       await fetchData(session.user); // Refresh data from DB
     }
