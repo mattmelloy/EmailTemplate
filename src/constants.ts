@@ -9,7 +9,7 @@ export const EMPTY_TEMPLATE: Omit<Template, 'id' | 'createdAt' | 'updatedAt' | '
   name: '',
   fromName: '',
   fromEmail: '',
-  recipient: '',
+  recipients: '',
   cc: '',
   bcc: '',
   subject: '',

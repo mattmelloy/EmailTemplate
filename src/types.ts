@@ -22,7 +22,7 @@ export interface Template {
   name: string;
   fromName?: string;
   fromEmail?: string;
-  recipient: string;
+  recipients: string;
   cc: string;
   bcc: string;
   subject: string;

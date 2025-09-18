@@ -1,7 +1,7 @@
 interface EmailData {
   fromName?: string;
   fromEmail: string;
-  recipient: string;
+  recipients: string;
   cc?: string;
   subject: string;
   body: string; // HTML body
@@ -21,7 +21,7 @@ export function generateEmlContent(data: EmailData): string {
 
   const headers = [
     `From: ${fromHeaderValue}`,
-    `To: ${data.recipient}`,
+    `To: ${data.recipients}`,
     data.cc ? `Cc: ${data.cc}` : null,
     `Subject: ${data.subject}`,
     `MIME-Version: 1.0`,

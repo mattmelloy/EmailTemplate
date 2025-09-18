@@ -101,8 +101,8 @@ const TemplateEditor: React.FC<TemplateEditorProps> = ({ template, onSave, onClo
               <input type="text" name="subject" id="subject" value={editedTemplate.subject} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
             </div>
              <div>
-              <label htmlFor="recipient" className="block text-sm font-medium text-gray-700 dark:text-gray-300">To</label>
-              <input type="text" name="recipient" id="recipient" value={editedTemplate.recipient} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
+              <label htmlFor="recipients" className="block text-sm font-medium text-gray-700 dark:text-gray-300">To</label>
+              <input type="text" name="recipients" id="recipients" value={editedTemplate.recipients} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
             </div>
             <div>
               <label htmlFor="cc" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Cc</label>

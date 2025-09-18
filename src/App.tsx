@@ -38,12 +38,11 @@ const App: React.FC = () => {
     ];
     setFolders(defaultFolders);
 
-    // Fetch templates
-    // This fetches templates created by the user OR templates visible to their team
+    // Fetch templates. RLS policies will automatically filter to show the user's own
+    // templates plus any templates where visibility is 'team'.
     const { data, error } = await supabase
       .from('templates')
-      .select('*')
-      .or(`user_id.eq.${user.id},and(visibility.eq.team,team_id.eq.${TEAM_ID})`);
+      .select('*');
 
     if (error) {
       console.error('Error fetching templates:', error);
@@ -58,7 +57,7 @@ const App: React.FC = () => {
         name: t.name,
         fromName: t.from_name,
         fromEmail: t.from_email,
-        recipient: t.to, // Map database 'to' to app 'recipient'
+        recipients: t.recipients,
         cc: t.cc,
         bcc: t.bcc,
         subject: t.subject,
@@ -126,7 +125,7 @@ const App: React.FC = () => {
     if (!session?.user) return;
 
     // Map frontend camelCase to database snake_case
-    const { id, teamId, userId, folderId, name, fromName, fromEmail, recipient, cc, bcc, subject, body, placeholders, priority, visibility } = templateToSave;
+    const { id, teamId, userId, folderId, name, fromName, fromEmail, recipients, cc, bcc, subject, body, placeholders, priority, visibility } = templateToSave;
     const record = {
       team_id: teamId,
       user_id: userId,
@@ -134,8 +133,7 @@ const App: React.FC = () => {
       name,
       from_name: fromName,
       from_email: fromEmail,
-      'to': recipient, // Map app 'recipient' to database 'to'
-      cc, bcc, subject, body, placeholders, priority, visibility,
+      recipients, cc, bcc, subject, body, placeholders, priority, visibility,
     };
 
     let error;
